@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block css %}
+<style>
+    .container {
+        min-height: 100vh;
+        width: 80%;
+        margin: auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h3 {
+        color: #333;
+        font-weight: 600;
+    }
+
+    .nav-tabs {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .nav-tabs button {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        background: #f8f9fa;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        transition: 0.3s;
+    }
+
+    .nav-tabs button.active {
+        background: #fff;
+        border-bottom: 2px solid #2d3436;
+        color: #2d3436;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-primary {
+        padding: 0.7rem 1.2rem;
+        border: none;
+        background: #2d3436;
+        color: white;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background: #5d6265;
+    }
+
+    .source-list {
+        margin-top: 1rem;
+        padding: 0;
+        list-style: none;
+    }
+
+    .source-list li {
+        background: #f8f9fa;
+        padding: 0.7rem;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .source-list a {
+        text-decoration: none;
+        color: red;
+        font-weight: 500;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="container">
+
+    <h3>Welcome, {{ request.user.username}}!</h3>
+
+    {% if messages %}
+    <div class="message">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tabs for switching -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'updateForm')">Update Details</button>
+        <button class="tab-btn" onclick="switchTab(event, 'incomeSources')">Manage Income Sources</button>
+    </div>
+
+    <!-- Update Form -->
+    <div id="updateForm" class="tab-content active">
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for fm in form %}
+            <div class="form-group">
+                <label>{{ fm.label_tag }}</label>
+                {{ fm }}
+                <small class="text-danger">{{ fm.errors|striptags }}</small>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-dark">Update</button>
+        </form>
+    </div>
+
+    <!-- Manage Income Sources -->
+    <div id="incomeSources" class="tab-content">
+        <form action="{% url 'addSource' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" placeholder="Enter Income Source" name="Source" required>
+            </div>
+            <button type="submit" class="btn btn-dark">Add Source</button>
+        </form>
+
+        <ul class="source-list">
+            {% for source in sources %}
+            <li>
+                {{ source }}
+                <a href="{% url 'deleteSource' source.id %}">Delete</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(event, tabId) {
+        document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+
+        event.currentTarget.classList.add("active");
+        document.getElementById(tabId).classList.add("active");
+    }
+</script>
+{% endblock content %}
